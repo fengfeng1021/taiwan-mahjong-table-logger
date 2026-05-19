@@ -3,47 +3,66 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#17211c" />
-    <title>台麻牌桌記錄</title>
+    <meta name="theme-color" content="#15231d" />
+    <title>台麻即時教練</title>
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
-    <main class="phone-shell" aria-label="台麻牌桌記錄工具">
+    <main class="phone-shell" aria-label="台麻即時教練">
       <header class="app-header">
         <div>
-          <p class="eyebrow">Taiwan Mahjong Logger</p>
-          <h1>台麻牌桌記錄</h1>
+          <p class="eyebrow">Taiwan Mahjong Coach</p>
+          <h1>台麻即時教練</h1>
         </div>
-        <div class="round-chip" id="stateChip">未開始</div>
+        <div class="state-chip" id="stateChip">未開局</div>
       </header>
+
+      <section class="coach-panel" aria-live="polite">
+        <div class="coach-topline">
+          <div>
+            <span class="field-label">即時建議</span>
+            <strong id="mainAdvice">先選你這局第幾個摸牌</strong>
+          </div>
+          <div class="win-rate">
+            <span id="winRateText">--%</span>
+            <small>估算勝率</small>
+          </div>
+        </div>
+        <div class="metric-grid">
+          <div>
+            <span>距離</span>
+            <strong id="needText">--</strong>
+          </div>
+          <div>
+            <span>進張</span>
+            <strong id="outsText">--</strong>
+          </div>
+          <div>
+            <span>危險</span>
+            <strong id="riskText">--</strong>
+          </div>
+        </div>
+        <p class="advice-reason" id="adviceReason">起手錄牌完成後，APP 會依手牌效率、剩餘牌、牌河危險度和他家聽牌傾向即時推薦。</p>
+        <div class="call-advice" id="callAdvice" hidden></div>
+      </section>
 
       <section class="setup-panel" aria-labelledby="setupTitle">
         <div class="panel-title-row">
-          <h2 id="setupTitle">開局設定</h2>
+          <h2 id="setupTitle">開局</h2>
           <button class="ghost-button compact" id="resetAllButton" type="button">清空</button>
         </div>
-
-        <div class="setup-grid">
-          <div>
-            <div class="field-label">當前局牌</div>
-            <div class="segmented compact-grid" id="roundMarkerGroup" aria-label="當前局牌"></div>
-          </div>
-          <div>
-            <div class="field-label">我坐的位置</div>
-            <div class="segmented seat-grid" id="seatGroup" aria-label="我的座位"></div>
-          </div>
-        </div>
-
+        <div class="field-label">我這局第幾個摸牌</div>
+        <div class="segmented draw-order-grid" id="drawOrderGroup" aria-label="我的摸牌順位"></div>
         <div class="button-row">
-          <button class="primary-button" id="startButton" type="button">開啟當前對局</button>
-          <button class="secondary-button" id="nextRoundButton" type="button">下一局</button>
+          <button class="primary-button" id="startButton" type="button">開局錄手牌</button>
+          <button class="secondary-button" id="finishHandButton" type="button">開始實戰</button>
         </div>
       </section>
 
-      <section class="status-strip" aria-live="polite">
+      <section class="status-strip">
         <div>
-          <span class="field-label">目前輪到</span>
-          <strong id="currentTurnText">先設定開局</strong>
+          <span class="field-label">目前節奏</span>
+          <strong id="phaseText">先開局</strong>
         </div>
         <div>
           <span class="field-label">上一張</span>
@@ -59,46 +78,43 @@
         <div class="my-hand" id="myHandList" aria-label="我的手牌"></div>
       </section>
 
+      <section class="reads-panel" aria-labelledby="readsTitle">
+        <div class="panel-title-row">
+          <h2 id="readsTitle">他家聽牌預測</h2>
+          <span class="hint-text">依牌河進度估算</span>
+        </div>
+        <div class="reads-grid" id="readsGrid"></div>
+      </section>
+
       <section class="table-panel" aria-labelledby="riverTitle">
         <div class="panel-title-row">
           <h2 id="riverTitle">牌河</h2>
-          <span class="hint-text">照實際出牌順序點牌</span>
+          <span class="hint-text">輪到誰，就點他打出的牌</span>
         </div>
         <div class="players-grid" id="playersGrid"></div>
       </section>
 
       <section class="meld-panel" aria-labelledby="meldTitle">
         <div class="panel-title-row">
-          <h2 id="meldTitle">吃碰槓</h2>
-          <span class="hint-text" id="meldHint">上一張棄牌後可記錄</span>
+          <h2 id="meldTitle">我的副露</h2>
+          <span class="hint-text" id="meldHint">吃碰槓會自動扣手牌</span>
         </div>
         <div class="meld-list" id="meldList"></div>
       </section>
 
       <section class="action-dock" aria-label="操作">
-        <button class="dock-button" id="modeRiverButton" type="button">牌河</button>
-        <button class="dock-button" id="modeHandButton" type="button">手牌</button>
-        <button class="dock-button" id="chiButton" type="button">吃</button>
-        <button class="dock-button" id="pongButton" type="button">碰</button>
-        <button class="dock-button" id="kongButton" type="button">槓</button>
+        <button class="dock-button" id="passButton" type="button">過</button>
+        <button class="dock-button" id="autoCallButton" type="button">照建議</button>
+        <button class="dock-button" id="finishHandDockButton" type="button">實戰</button>
         <button class="dock-button" id="undoButton" type="button">撤回</button>
         <button class="dock-button copy" id="copyButton" type="button">複製</button>
       </section>
 
       <section class="tile-pad" aria-label="麻將牌選擇">
+        <div class="tile-pad-caption" id="tilePadCaption">點牌加入起手牌</div>
         <div class="tile-grid" id="tileGrid"></div>
       </section>
     </main>
-
-    <div class="modal-backdrop" id="modalBackdrop" hidden>
-      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-        <div class="panel-title-row">
-          <h2 id="modalTitle">選擇</h2>
-          <button class="ghost-button compact" id="modalCloseButton" type="button">關閉</button>
-        </div>
-        <div id="modalBody"></div>
-      </div>
-    </div>
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
