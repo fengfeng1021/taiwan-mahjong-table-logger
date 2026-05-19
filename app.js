@@ -1,13 +1,13 @@
 const HONORS = ["東", "南", "西", "北", "中", "發", "白"];
 const WINDS = ["東", "南", "西", "北"];
-const SUITS = [
-  { key: "wan", label: "萬", short: "萬" },
-  { key: "tong", label: "筒", short: "筒" },
-  { key: "tiao", label: "條", short: "條" },
-  { key: "honor", label: "字", short: "字" },
-];
 const WIND_ORDER = ["東", "南", "西", "北"];
 const STORAGE_KEY = "tw-mahjong-table-logger-v1";
+const TILE_GROUPS = [
+  { suit: "wan", label: "萬" },
+  { suit: "tong", label: "筒" },
+  { suit: "tiao", label: "條" },
+  { suit: "honor", label: "字" },
+];
 
 const numberLabels = ["", "一", "二", "三", "四", "五", "六", "七", "八", "九"];
 
@@ -34,7 +34,6 @@ const TILE_BY_ID = Object.fromEntries(TILES.map((tile) => [tile.id, tile]));
 
 let state = loadState();
 let history = [];
-let selectedSuit = "wan";
 let toastTimer = 0;
 
 const els = {
@@ -58,7 +57,6 @@ const els = {
   kongButton: document.querySelector("#kongButton"),
   undoButton: document.querySelector("#undoButton"),
   copyButton: document.querySelector("#copyButton"),
-  suitTabs: document.querySelector("#suitTabs"),
   tileGrid: document.querySelector("#tileGrid"),
   modalBackdrop: document.querySelector("#modalBackdrop"),
   modalTitle: document.querySelector("#modalTitle"),
@@ -71,7 +69,6 @@ init();
 
 function init() {
   renderSetupControls();
-  renderSuitTabs();
   bindEvents();
   render();
 }
@@ -188,22 +185,6 @@ function renderSetupControls() {
       render();
     });
     els.seatGroup.append(button);
-  });
-}
-
-function renderSuitTabs() {
-  els.suitTabs.innerHTML = "";
-  SUITS.forEach((suit) => {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.textContent = suit.label;
-    button.addEventListener("click", () => {
-      selectedSuit = suit.key;
-      renderTileGrid();
-      renderSuitTabs();
-    });
-    if (selectedSuit === suit.key) button.classList.add("active");
-    els.suitTabs.append(button);
   });
 }
 
@@ -341,15 +322,23 @@ function renderMode() {
 
 function renderTileGrid() {
   els.tileGrid.innerHTML = "";
-  const tiles = TILES.filter((tile) => tile.suit === selectedSuit);
-  tiles.forEach((tile) => {
-    const button = document.createElement("button");
-    button.className = "tile-button";
-    button.type = "button";
-    button.title = tile.label;
-    button.append(makeTileChip(tile.id));
-    button.addEventListener("click", () => handleTileClick(tile.id));
-    els.tileGrid.append(button);
+  TILE_GROUPS.forEach((group) => {
+    const row = document.createElement("div");
+    row.className = `tile-suit-row tile-suit-row-${group.suit}`;
+    row.setAttribute("aria-label", `${group.label}牌`);
+
+    const tiles = TILES.filter((tile) => tile.suit === group.suit);
+    tiles.forEach((tile) => {
+      const button = document.createElement("button");
+      button.className = "tile-button";
+      button.type = "button";
+      button.title = tile.label;
+      button.append(makeTileChip(tile.id));
+      button.addEventListener("click", () => handleTileClick(tile.id));
+      row.append(button);
+    });
+
+    els.tileGrid.append(row);
   });
 }
 
